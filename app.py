@@ -2,7 +2,8 @@ import hashlib
 import json
 from time import time
 from typing import List, Dict
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
+from flask_cors import CORS
 import os
 
 class Blockchain:
@@ -91,32 +92,44 @@ class Blockchain:
             current_index += 1
         return True
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
+CORS(app) 
 
-# Instantiate Blockchain
 blockchain = Blockchain()
 
-@app.route('/', methods=['GET'])
-def home():
+@app.route('/')
+def index():
+    """
+    Serve the main HTML interface
+    """
+    return send_from_directory('static', 'index.html')
+
+@app.route('/api')
+def api_home():
+    """
+    API information endpoint
+    """
     return jsonify({
         'message': 'Blockchain API is running',
+        'version': '1.0.0',
         'endpoints': {
-            '/transaction/new': 'POST - Create new transaction',
-            '/mine': 'GET - Mine a new block',
-            '/chain': 'GET - Get full blockchain',
-            '/validate': 'GET - Validate blockchain'
+            '/': 'GET - Web Interface',
+            '/api': 'GET - API Information',
+            '/api/transaction/new': 'POST - Create new transaction',
+            '/api/mine': 'GET - Mine a new block',
+            '/api/chain': 'GET - Get full blockchain',
+            '/api/validate': 'GET - Validate blockchain'
         }
     }), 200
 
-@app.route('/transaction/new', methods=['POST'])
+@app.route('/api/transaction/new', methods=['POST'])
 def new_transaction():
     values = request.get_json()
 
     required_fields = ['sender', 'recipient', 'product_data']
     if not all(field in values for field in required_fields):
-        return jsonify({'error': 'Missing values'}), 400
+        return jsonify({'error': 'Missing values', 'required': required_fields}), 400
 
-    # Create a new transaction
     index = blockchain.new_transaction(
         values['sender'],
         values['recipient'],
@@ -125,14 +138,13 @@ def new_transaction():
     response = {'message': f'Transaction will be added to Block {index}'}
     return jsonify(response), 201
 
-@app.route('/mine', methods=['GET'])
+@app.route('/api/mine', methods=['GET'])
 def mine():
-    # Run Proof of Work Algorithm to get next proof
+
     last_block = blockchain.last_block
     last_proof = last_block['proof']
     proof = blockchain.proof_of_work(last_proof)
 
-    # Add the new block to the chain
     blockchain.new_transaction(
         sender="0",
         recipient="miner_address",
@@ -149,7 +161,7 @@ def mine():
     }
     return jsonify(response), 200
 
-@app.route('/chain', methods=['GET'])
+@app.route('/api/chain', methods=['GET'])
 def full_chain():
     response = {
         'chain': blockchain.get_chain(),
@@ -157,7 +169,7 @@ def full_chain():
     }
     return jsonify(response), 200
 
-@app.route('/validate', methods=['GET'])
+@app.route('/api/validate', methods=['GET'])
 def validate_chain():
     if blockchain.is_valid():
         return jsonify({'message': 'Blockchain is valid', 'valid': True}), 200
