@@ -93,8 +93,8 @@ curl http://your-url/validate
 ## Project Structure
 
 ```
-blockchain-api/
-├── blockchain_app.py      # Main application file
+/
+├── app.py      # Main application file
 ├── requirements.txt       # Python dependencies
 ├── README.md             # Documentation
 └── Blockchain_Colab.ipynb # Google Colab notebook
