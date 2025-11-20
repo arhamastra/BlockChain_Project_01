@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blockchain API</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #ffffff;
+            color: #000000;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 60px 0 40px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #666;
+            font-weight: 400;
+        }
+
+        .api-url {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f8f8;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .api-url label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            color: #666;
+        }
+
+        .api-url input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d0d0d0;
+            background: white;
+            font-size: 1rem;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: #000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .card p {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        .method {
+            display: inline-block;
+            padding: 4px 10px;
+            background: #000;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .method.post {
+            background: #000;
+        }
+
+        .method.get {
+            background: #666;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px 24px;
+            background: #000;
+            color: white;
+            border: 1px solid #000;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        button:hover {
+            background: white;
+            color: #000;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+
+        .response {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f8f8;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .response.show {
+            display: block;
+        }
+
+        .response pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .blockchain-view {
+            margin: 40px 0;
+            padding: 30px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+        }
+
+        .blockchain-view h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .block {
+            padding: 20px;
+            margin-bottom: 15px;
+            background: #fafafa;
+            border-left: 4px solid #000;
+            border-radius: 4px;
+        }
+
+        .block-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .block-data {
+            font-size: 0.9rem;
+            color: #666;
+            font-family: 'Courier New', monospace;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status.success {
+            background: #000;
+            color: white;
+        }
+
+        .status.error {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            margin-top: 60px;
+            border-top: 1px solid #e0e0e0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #000;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Blockchain API</h1>
+            <p class="subtitle">A minimalist blockchain implementation with REST API</p>
+        </header>
+
+        <div class="api-url">
+            <label>API Base URL</label>
+            <input type="text" id="apiUrl" value="http://localhost:5000" placeholder="Enter your API URL">
+        </div>
+
+        <div class="grid">
+            <!-- Get Chain -->
+            <div class="card">
+                <span class="method get">GET</span>
+                <h3>View Blockchain</h3>
+                <p>Retrieve the complete blockchain with all blocks and transactions</p>
+                <button onclick="getChain()">Get Chain</button>
+                <div id="chainResponse" class="response"></div>
+            </div>
+
+            <!-- Mine Block -->
+            <div class="card">
+                <span class="method get">GET</span>
+                <h3>Mine Block</h3>
+                <p>Mine a new block using proof of work algorithm</p>
+                <button onclick="mineBlock()">Mine Block</button>
+                <div id="mineResponse" class="response"></div>
+            </div>
+
+            <!-- Validate Chain -->
+            <div class="card">
+                <span class="method get">GET</span>
+                <h3>Validate Chain</h3>
+                <p>Check the integrity and validity of the blockchain</p>
+                <button onclick="validateChain()">Validate</button>
+                <div id="validateResponse" class="response"></div>
+            </div>
+
+            <!-- New Transaction -->
+            <div class="card">
+                <span class="method post">POST</span>
+                <h3>New Transaction</h3>
+                <p>Create a new transaction to be added to the next block</p>
+                <div class="input-group">
+                    <label>Sender</label>
+                    <input type="text" id="sender" placeholder="Alice">
+                </div>
+                <div class="input-group">
+                    <label>Recipient</label>
+                    <input type="text" id="recipient" placeholder="Bob">
+                </div>
+                <div class="input-group">
+                    <label>Product Data</label>
+                    <input type="text" id="productData" placeholder="Product details">
+                </div>
+                <button onclick="createTransaction()">Create Transaction</button>
+                <div id="transactionResponse" class="response"></div>
+            </div>
+        </div>
+
+        <div class="blockchain-view">
+            <h2>Blockchain Visualization</h2>
+            <div id="blockchainDisplay">
+                <p style="color: #666; text-align: center;">Click "Get Chain" to view the blockchain</p>
+            </div>
+        </div>
+
+        <footer>
+            <p>Blockchain API © 2024 | Built with Flask & Python</p>
+        </footer>
+    </div>
+
+    <script>
+        function getApiUrl() {
+            return document.getElementById('apiUrl').value;
+        }
+
+        function showResponse(elementId, data, isError = false) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            element.classList.add('show');
+        }
+
+        function showLoading(button) {
+            button.disabled = true;
+            button.innerHTML += '<span class="loading"></span>';
+        }
+
+        function hideLoading(button, originalText) {
+            button.disabled = false;
+            button.innerHTML = originalText;
+        }
+
+        async function getChain() {
+            const button = event.target;
+            const originalText = button.innerHTML;
+            showLoading(button);
+
+            try {
+                const response = await fetch(`${getApiUrl()}/chain`);
+                const data = await response.json();
+                showResponse('chainResponse', data);
+                displayBlockchain(data.chain);
+            } catch (error) {
+                showResponse('chainResponse', { error: error.message }, true);
+            } finally {
+                hideLoading(button, originalText);
+            }
+        }
+
+        async function mineBlock() {
+            const button = event.target;
+            const originalText = button.innerHTML;
+            showLoading(button);
+
+            try {
+                const response = await fetch(`${getApiUrl()}/mine`);
+                const data = await response.json();
+                showResponse('mineResponse', data);
+                getChain();
+            } catch (error) {
+                showResponse('mineResponse', { error: error.message }, true);
+            } finally {
+                hideLoading(button, originalText);
+            }
+        }
+
+        async function validateChain() {
+            const button = event.target;
+            const originalText = button.innerHTML;
+            showLoading(button);
+
+            try {
+                const response = await fetch(`${getApiUrl()}/validate`);
+                const data = await response.json();
+                showResponse('validateResponse', data);
+            } catch (error) {
+                showResponse('validateResponse', { error: error.message }, true);
+            } finally {
+                hideLoading(button, originalText);
+            }
+        }
+
+        async function createTransaction() {
+            const button = event.target;
+            const originalText = button.innerHTML;
+            showLoading(button);
+
+            const sender = document.getElementById('sender').value;
+            const recipient = document.getElementById('recipient').value;
+            const productData = document.getElementById('productData').value;
+
+            if (!sender || !recipient || !productData) {
+                showResponse('transactionResponse', { error: 'All fields are required' }, true);
+                hideLoading(button, originalText);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${getApiUrl()}/transaction/new`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        sender: sender,
+                        recipient: recipient,
+                        product_data: productData
+                    })
+                });
+                const data = await response.json();
+                showResponse('transactionResponse', data);
+                
+                // Clear inputs
+                document.getElementById('sender').value = '';
+                document.getElementById('recipient').value = '';
+                document.getElementById('productData').value = '';
+            } catch (error) {
+                showResponse('transactionResponse', { error: error.message }, true);
+            } finally {
+                hideLoading(button, originalText);
+            }
+        }
+
+        function displayBlockchain(chain) {
+            const display = document.getElementById('blockchainDisplay');
+            if (!chain || chain.length === 0) {
+                display.innerHTML = '<p style="color: #666; text-align: center;">No blocks found</p>';
+                return;
+            }
+
+            let html = '';
+            chain.forEach(block => {
+                html += `
+                    <div class="block">
+                        <div class="block-header">
+                            <span>Block #${block.index}</span>
+                            <span class="status success">Valid</span>
+                        </div>
+                        <div class="block-data">
+                            <strong>Timestamp:</strong> ${new Date(block.timestamp * 1000).toLocaleString()}<br>
+                            <strong>Proof:</strong> ${block.proof}<br>
+                            <strong>Previous Hash:</strong> ${block.previous_hash}<br>
+                            <strong>Transactions:</strong> ${block.transactions.length}
+                        </div>
+                    </div>
+                `;
+            });
+            display.innerHTML = html;
+        }
+
+        window.addEventListener('load', () => {
+            getChain();
+        });
+    </script>
+</body>
+</html>
